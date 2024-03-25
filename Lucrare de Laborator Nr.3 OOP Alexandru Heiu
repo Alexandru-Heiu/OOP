@@ -1,4 +1,3 @@
-
 import os
 from datetime import datetime
 import threading
@@ -99,6 +98,3 @@ try:
 except KeyboardInterrupt:
     print("\nKeyboard interrupt detected. Exiting...")
     file_monitor.stop_monitoring()
-
-
-
