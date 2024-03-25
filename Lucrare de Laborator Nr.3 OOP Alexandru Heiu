@@ -1,0 +1,104 @@
+
+import os
+from datetime import datetime
+import threading
+import time
+import json
+
+class FileMonitor:
+    def __init__(self, folder_path):
+        self.folder_path = folder_path
+        self.snapshot = set()
+        self.snapshot_file = os.path.join(folder_path, "snapshot.json")
+        self.load_snapshot()
+        self.update_event = threading.Event()
+        self.update_thread = threading.Thread(target=self.update_snapshot, daemon=True)
+
+    def load_snapshot(self):
+        if os.path.exists(self.snapshot_file):
+            with open(self.snapshot_file, "r") as f:
+                self.snapshot = set(json.load(f))
+        else:
+            self.snapshot = set()
+
+    def save_snapshot(self):
+        with open(self.snapshot_file, "w") as f:
+            json.dump(list(self.snapshot), f)
+
+    def update_snapshot(self):
+        while not self.update_event.is_set():
+            current_files = set(os.listdir(self.folder_path))
+            new_files = current_files - self.snapshot
+            deleted_files = self.snapshot - current_files
+            if new_files or deleted_files:
+                print("Changes detected at", datetime.now())
+                if new_files:
+                    print("New files added:", new_files)
+                if deleted_files:
+                    print("Files deleted:", deleted_files)
+                self.save_snapshot()
+            self.snapshot = current_files
+            time.sleep(5) 
+
+    def start_monitoring(self):
+        self.update_thread.start()
+
+    def stop_monitoring(self):
+        self.update_event.set()
+        self.update_thread.join()
+
+class FileInspector(FileMonitor):
+    def list_files(self):
+        files = os.listdir(self.folder_path)
+        for file in files:
+            file_path = os.path.join(self.folder_path, file)
+            if os.path.isfile(file_path):
+                file_size = os.path.getsize(file_path)
+                last_modified_time = os.path.getmtime(file_path)
+                last_modified_time_str = datetime.fromtimestamp(last_modified_time).strftime('%Y-%m-%d %H:%M:%S')
+                print(f"File: {file},\t Size: {file_size} bytes,\t Last Modified Time: {last_modified_time_str}")
+
+class FileManager(FileMonitor):
+    def get_snapshot_time(self):
+        if os.path.exists(self.snapshot_file):
+            self.snapshot_time = datetime.fromtimestamp(os.path.getmtime(self.snapshot_file))
+            return self.snapshot_time
+        else:
+            return None
+
+    def check_status(self):
+        snapshot_time = self.get_snapshot_time()
+        if snapshot_time:
+            print("Snapshot Time:", snapshot_time)
+        else:
+            print("Snapshot has not been updated.")
+
+        self.list_files()
+
+folder_path = input("Enter the folder path to monitor: ")
+file_monitor = FileMonitor(folder_path)
+file_inspector = FileInspector(folder_path)
+file_manager = FileManager(folder_path)
+file_monitor.start_monitoring()
+
+try:
+    while True:
+        action = input("Enter the action you want to perform: Monitor / List / Status (or type 'exit' to quit): ").lower()
+        if action == "monitor":
+            file_monitor.update_snapshot()
+        elif action == "list":
+            file_inspector.list_files()
+        elif action == "status":
+            file_manager.check_status()
+        elif action == "exit":
+            print("Exiting the program...")
+            file_monitor.stop_monitoring()
+            break
+        else:
+            print("Invalid action. Please try again.")
+except KeyboardInterrupt:
+    print("\nKeyboard interrupt detected. Exiting...")
+    file_monitor.stop_monitoring()
+
+
+
