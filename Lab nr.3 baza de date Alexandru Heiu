@@ -1,0 +1,155 @@
+DROP DATABASE IF EXISTS StoreDB;
+
+CREATE DATABASE StoreDB;
+
+USE StoreDB;
+
+CREATE TABLE Customers (
+  customer_id INT AUTO_INCREMENT PRIMARY KEY,
+  first_name VARCHAR(50),
+  last_name VARCHAR(50),
+  address VARCHAR(100),
+  email VARCHAR(100),
+  password VARCHAR(100),
+  theme varchar(50),
+  user_type_id INT,
+  registration_date DATE
+);
+
+CREATE TABLE User_Types (
+  user_type_id INT AUTO_INCREMENT PRIMARY KEY,
+  type_name VARCHAR(50)
+);
+
+CREATE TABLE Products (
+  product_id INT AUTO_INCREMENT PRIMARY KEY,
+  producer_id VARCHAR(50),
+  name VARCHAR(100),
+  description TEXT,
+  price DECIMAL(10, 2),
+  stock INT,
+  added_date DATE
+);
+
+CREATE TABLE Producers (
+  producer_id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100),
+  description TEXT,
+  registration_date DATE
+);
+
+CREATE TABLE Product_Producers(
+  product_producer_id INT AUTO_INCREMENT PRIMARY KEY,
+  producer_id INT,
+  product_id INT,
+  FOREIGN KEY (producer_id) REFERENCES Producers(producer_id),
+  FOREIGN KEY (product_id) REFERENCES Products(product_id)
+);
+
+CREATE TABLE Statuses(
+  status_id INT AUTO_INCREMENT PRIMARY KEY,
+  status_name varchar(50)
+);
+
+CREATE TABLE Orders (
+  order_id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_id INT,
+  order_date DATE,
+  delivery_date DATE,
+  total_cost DECIMAL(10, 2),
+  status_id INT,
+  FOREIGN KEY (customer_id) REFERENCES Customers(customer_id),
+  FOREIGN KEY (status_id) REFERENCES Statuses(status_id)
+);
+
+CREATE TABLE Order_Details (
+  detail_id INT AUTO_INCREMENT PRIMARY KEY,
+  order_id INT,
+  product_id INT,
+  quantity INT,
+  unit_price DECIMAL(10, 2),
+  FOREIGN KEY (order_id) REFERENCES Orders(order_id),
+  FOREIGN KEY (product_id) REFERENCES Products(product_id)
+);
+
+CREATE TABLE Delivery_Addresses (
+  address_id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_id INT,
+  delivery_address VARCHAR(100),
+  city VARCHAR(50),
+  postal_code VARCHAR(10),
+  country VARCHAR(50),
+  FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
+);
+
+CREATE TABLE Reviews (
+  review_id INT AUTO_INCREMENT PRIMARY KEY,
+  product_id INT,
+  customer_id INT,
+  rating INT,
+  comment TEXT,
+  creation_date DATE,
+  FOREIGN KEY (product_id) REFERENCES Products(product_id),
+  FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
+);
+
+INSERT INTO User_Types(type_name)
+VALUES
+  ('Regular'),
+  ('Admin');
+
+INSERT INTO Customers (first_name, last_name, address, email, password, theme,user_type_id, registration_date)
+VALUES
+  ('Michael', 'Brown', '123 Oak St', 'michael.brown@example.com', 'pass123','light', 1, '2023-10-01'),
+  ('Emily', 'Jones', '456 Pine St', 'emily.jones@example.com', 'pass456','light', 1, '2023-10-02'),
+  ('David', 'Clark', '789 Maple St', 'david.clark@example.com', 'pass789','light', 1, '2023-10-03'),
+  ('Elena', 'Popescu', 'Bulevardul Dacia', 'elena@example.com', 'Popescu','light', 2, '2023-11-04');
+
+-- Insert data into the Products table
+INSERT INTO Products (producer_id, name, description, price, stock, added_date)
+VALUES
+  ('1', 'Item 1', 'Description for Item 1', 19.99, 100, '2023-10-01'),
+  ('2', 'Item 2', 'Description for Item 2', 29.99, 75, '2023-10-02'),
+  ('1', 'Item 3', 'Description for Item 3', 9.99, 50, '2023-10-03');
+
+-- Insert data into the Producers table
+INSERT INTO Producers (name, description, registration_date)
+VALUES
+  ('Manufacturer 1', 'Description for Manufacturer 1', '2023-10-01'),
+  ('Manufacturer 2', 'Description for Manufacturer 2', '2023-10-02'),
+  ('Manufacturer 3', 'Description for Manufacturer 3', '2023-10-03');
+
+-- Insert data into the Statuses table
+INSERT INTO Statuses (status_name)
+VALUES
+  ('Processing'),
+  ('Dispatched'),
+  ('Delivered');
+
+-- Insert data into the Orders table
+INSERT INTO Orders (customer_id, order_date, delivery_date, total_cost, status_id)
+VALUES
+  (1, '2023-10-04', '2023-10-08', 59.97, 1),
+  (2, '2023-10-05', '2023-10-09', 89.97, 2),
+  (3, '2023-10-06', '2023-10-10', 29.97, 3);
+
+-- Insert data into the Order_Details table
+INSERT INTO Order_Details (order_id, product_id, quantity, unit_price)
+VALUES
+  (1, 1, 3, 19.99),
+  (2, 2, 2, 29.99),
+  (3, 1, 5, 9.99);
+
+-- Insert data into the Delivery_Addresses table
+INSERT INTO Delivery_Addresses (customer_id, delivery_address, city, postal_code, country)
+VALUES
+  (1, '456 Birch St', 'City1', '12345', 'Country1'),
+  (2, '789 Cedar St', 'City2', '67890', 'Country2'),
+  (3, '123 Walnut St', 'City3', '54321', 'Country3');
+
+-- Insert data into the Reviews table
+INSERT INTO Reviews (product_id, customer_id, rating, comment, creation_date)
+VALUES
+  (1, 1, 5, 'Great item!', '2023-10-11'),
+  (2, 2, 4, 'Good item, but could be better.', '2023-10-12'),
+  (3, 3, 5, 'Excellent value for the price.', '2023-10-13');
