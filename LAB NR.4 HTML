@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autentificare și Înregistrare</title>
+</head>
+<body>
+    <h2>Înregistrare Utilizator Nou</h2>
+    <form action="inregistrare.php" method="post">
+        <label for="nume">Nume:</label><br>
+        <input type="text" id="nume" name="nume" required><br>
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br>
+        <label for="parola">Parolă:</label><br>
+        <input type="password" id="parola" name="parola" required><br><br>
+        <input type="submit" value="Înregistrare">
+    </form>
+
+    <h2>Autentificare Utilizator</h2>
+    <form action="autentificare.php" method="post">
+        <label for="email_aut">Email:</label><br>
+        <input type="email" id="email_aut" name="email" required><br>
+        <label for="parola_aut">Parolă:</label><br>
+        <input type="password" id="parola_aut" name="parola" required><br><br>
+        <input type="submit" value="Autentificare">
+    </form>
+</body>
+</html>
