@@ -1,0 +1,54 @@
+<?php
+
+// Conexiunea la baza de date
+$servername = "localhost";
+$username = "utilizator";
+$password = "parola";
+$database = "nume_baza_de_date";
+
+$conn = new mysqli($servername, $username, $password, $database);
+
+// Verificăm conexiunea
+if ($conn->connect_error) {
+    die("Conexiunea la baza de date a eșuat: " . $conn->connect_error);
+}
+
+// Funcție pentru hashuirea parolei
+function hash_parola($parola) {
+    return hash('sha256', $parola);
+}
+
+// Endpoint pentru înregistrarea unui utilizator nou
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nume']) && isset($_POST['email']) && isset($_POST['parola'])) {
+    $nume = $_POST['nume'];
+    $email = $_POST['email'];
+    $parola = hash_parola($_POST['parola']);
+
+    $sql = "INSERT INTO utilizatori (nume, email, parola) VALUES ('$nume', '$email', '$parola')";
+
+    if ($conn->query($sql) === TRUE) {
+        echo json_encode(array('mesaj' => 'Utilizator înregistrat cu succes!'));
+    } else {
+        echo json_encode(array('mesaj' => 'Eroare la înregistrarea utilizatorului: ' . $conn->error));
+    }
+}
+
+// Endpoint pentru autentificarea unui utilizator
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email']) && isset($_POST['parola'])) {
+    $email = $_POST['email'];
+    $parola = hash_parola($_POST['parola']);
+
+    $sql = "SELECT * FROM utilizatori WHERE email='$email' AND parola='$parola'";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        echo json_encode(array('mesaj' => 'Autentificare reușită!'));
+    } else {
+        echo json_encode(array('mesaj' => 'Autentificare eșuată! Verificați email-ul și parola.'), 401);
+    }
+}
+
+// Închidem conexiunea
+$conn->close();
+
+?>
